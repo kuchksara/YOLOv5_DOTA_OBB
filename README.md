@@ -1,154 +1,70 @@
-# YOLOv5_DOTA_OBB
-YOLOv5 in DOTA_OBB dataset with CSL_label.(Oriented Object Detection)
+# Yolov5 for Oriented Object Detection
+![图片](./docs/detection.png)
+![train_batch0.jpg](./docs/train_batch6.jpg)
+![results.png](./docs/results.png)
+
+The code for the implementation of “[Yolov5](https://github.com/ultralytics/yolov5) + [Circular Smooth Label](https://arxiv.org/abs/2003.05597v2)”. 
+
+# Results and Models
+The results on **DOTA_subsize1024_gap200_rate1.0** test-dev set are shown in the table below. (**password: yolo**)
+
+ |Model<br><sup>(download link) |Size<br><sup>(pixels) | TTA<br><sup>(multi-scale/<br>rotate testing) | OBB mAP<sup>test<br><sup>0.5<br>DOTAv1.0 | OBB mAP<sup>test<br><sup>0.5<br>DOTAv1.5 | OBB mAP<sup>test<br><sup>0.5<br>DOTAv2.0 | Speed<br><sup>CPU b1<br>(ms)|Speed<br><sup>2080Ti b1<br>(ms) |Speed<br><sup>2080Ti b16<br>(ms) |params<br><sup>(M) |FLOPs<br><sup>@640 (B) 
+ | ----                                                                                                                                                           | ---  | ---   | ---      | ---   | ---   | ---   | ---   | --- | --- | ---
+ |yolov5m [[baidu](https://pan.baidu.com/s/1UPNaMuQ_gNce9167FZx8-w)/[google](https://drive.google.com/file/d/1NMgxcN98cmBg9_nVK4axxqfiq4pYh-as/view?usp=sharing)]  |1024  | ×     |**77.3** |**73.2** |**58.0**  |**328.2**      |**16.9**     |**11.3**      |**21.6**   |**50.5**   
+ |yolov5s [[baidu](https://pan.baidu.com/s/1Lqw42xlSZxZn-2gNniBpmw?pwd=yolo)]    |1024  | ×     |**76.8**   |-      |-      |-      |**15.6**  | -     |**7.5**     |**17.5**    
+ |yolov5n [[baidu](https://pan.baidu.com/s/1Lqw42xlSZxZn-2gNniBpmw?pwd=yolo)]    |1024  | ×     |**73.3**   |-      |-      |-      |**15.2**  | -     |**2.0**     |**5.0**
 
 
-## Datasets and pretrained checkpoint
-* `Datasets` : [DOTA](https://link.zhihu.com/?target=http%3A//captain.whu.edu.cn/DOTAweb/)
-* `Pretrained Checkpoint or Demo Files` : 
-    * `train,detect_and_evaluate_demo_files`:  | [Baidu Drive(pw:6666)](https://pan.baidu.com/s/19BGy_UIdk8N-mSjHBMI0QQ). |  [Google Drive](https://drive.google.com/file/d/1MdKTgXQpHFBk_RN9UDSIB42M5e8zQaTP/view?usp=sharing) |
-    * `yolov5x.pt`:  | [Baidu Drive(pw:6666)](https://pan.baidu.com/s/1pH6EGKZiIyGtoqUe3F8eWQ). |  [Google Drive](https://drive.google.com/file/d/1hGPB7iOl3EmB2vfm44xMpHJV8hPufHn2/view?usp=sharing) |
-    * `yolov5l.pt`:  | [Baidu Drive(pw:6666)](https://pan.baidu.com/s/16is2mx879jk9_4RHwcIgKw). |  [Google Drive](https://drive.google.com/file/d/12ljwafulmAP1i9XsaeYvEnIUd18agJcT/view?usp=sharing) |
-    * `yolov5m.pt`:  | [Baidu Drive(pw:6666)](https://pan.baidu.com/s/1ZQoxEB-1mtBAk3A-Rt85-A). |  [Google Drive](https://drive.google.com/file/d/1VSDegIUgTh-fMDIjuwTSQaZ1w5bVx2Vd/view?usp=sharing) |
-    * `yolov5s.pt`:  | [Baidu Drive(pw:6666)](https://pan.baidu.com/s/1jm7ijb0a3LVkg8P2bkmJnw). |  [Google Drive](https://drive.google.com/file/d/1ePo6OM8MbxG8nAkZS_Bt7cmnChSlKBmo/view?usp=sharing) |
-    * `YOLOv5_DOTAv1.5_OBB.pt`:  | [Baidu Drive(pw:6666)](https://pan.baidu.com/s/1WSJFwwM5nyWgPLzAV6rp8Q). |  [Google Drive](https://drive.google.com/file/d/171xlq49JEiKJ3L-UEV9tICXltPs92dLk/view?usp=sharing) |
+<details>
+  <summary>Table Notes (click to expand / **点我看更多**)</summary>
 
-## Fuction
-* `train.py`.  Train.
-
-* `detect.py`. Detect and visualize the detection result. Get the detection result txt.
-
-* `evaluation.py`.  Merge the detection result and visualize it. Finally evaluate the detector
+* All checkpoints are trained to 300 epochs with [COCO pre-trained checkpoints](https://github.com/ultralytics/yolov5/releases/tag/v6.0), default settings and hyperparameters.
+* **mAP<sup>test dota</sup>** values are for single-model single-scale on [DOTA](https://captain-whu.github.io/DOTA/index.html)(1024,1024,200,1.0) dataset.<br>Reproduce Example:
+ ```shell
+ python val.py --data 'data/dotav15_poly.yaml' --img 1024 --conf 0.01 --iou 0.4 --task 'test' --batch 16 --save-json --name 'dotav15_test_split'
+ python tools/TestJson2VocClassTxt.py --json_path 'runs/val/dotav15_test_split/best_obb_predictions.json' --save_path 'runs/val/dotav15_test_split/obb_predictions_Txt'
+ python DOTA_devkit/ResultMerge_multi_process.py --scrpath 'runs/val/dotav15_test_split/obb_predictions_Txt' --dstpath 'runs/val/dotav15_test_split/obb_predictions_Txt_Merged'
+ zip the poly format results files and submit it to https://captain-whu.github.io/DOTA/evaluation.html
+ ```
+* **Speed** averaged over DOTAv1.5 val_split_subsize1024_gap200 images using a 2080Ti gpu. NMS + pre-process times is included.<br>Reproduce by `python val.py --data 'data/dotav15_poly.yaml' --img 1024 --task speed --batch 1`
 
 
+</details>
 
-## Installation  (Linux Recommend, Windows not Recommend)
-`1.` Python 3.8 with all requirements.txt dependencies installed, including torch==1.6, opencv-python==4.1.2.30, To install run:
-```
-$   pip install -r requirements.txt
-```
-`2.` Install swig
-```
-$   cd  \.....\yolov5_DOTA_OBB\utils
-$   sudo apt-get install swig
-```
-`3.` Create the c++ extension for python
-```
-$   swig -c++ -python polyiou.i
-$   python setup.py build_ext --inplace
-```
+# [Updates](./docs/ChangeLog.md)
+- [2022/1/7] : **Faster and stronger**, some bugs fixed, yolov5 base version updated.
 
 
+# Installation
+Please refer to [install.md](./docs/install.md) for installation and dataset preparation.
 
-## More detailed explanation
-想要了解相关实现的细节和原理可以看我的知乎文章:   
+# Getting Started 
+This repo is based on [yolov5](https://github.com/ultralytics/yolov5). 
 
-* [YOLOv5_DOTAv1.5(遥感旋转目标检测，全踩坑记录)](https://zhuanlan.zhihu.com/p/357992219).
-* [YOLOv5_DOTA无人机/遥感旋转目标检测项目代码（从数据集制作、模型训练、性能评估全套流程）](https://zhuanlan.zhihu.com/p/358072483).
-* [YOLOv5在无人机/遥感场景下做旋转目标检测时进行的适应性改建详解](https://zhuanlan.zhihu.com/p/358441134).
-* [【旋转目标检测】YOLOv5应对无人机/遥感场景相关难点的解决方案](https://zhuanlan.zhihu.com/p/359249077).
+And this repo has been rebuilt, Please see [GetStart.md](./docs/GetStart.md) for the Oriented Detection latest basic usage.
 
-
-## Usage Example
-`1.` `'Get Dataset' `
- 
-* Split the DOTA_OBB image and labels. Trans DOTA format to YOLO longside format.
-
-* You can refer to  [hukaixuan19970627/DOTA_devkit_YOLO](https://github.com/hukaixuan19970627/DOTA_devkit_YOLO).
-
-* The Oriented YOLO Longside Format is:
-
-```
-$  classid    x_c   y_c   longside   shortside    Θ    Θ∈[0, 180)
-
-
-* longside: The longest side of the oriented rectangle.
-
-* shortside: The other side of the oriented rectangle.
-
-* Θ: The angle between the longside and the x-axis(The x-axis rotates clockwise).x轴顺时针旋转遇到最长边所经过的角度
-```
-`WARNING: IMAGE SIZE MUST MEETS 'HEIGHT = WIDTH'`
-
-![label_format_demo](./label_format_demo.png)
-
-`2.` `'train.py'` 
-
-* All same as [ultralytics/yolov5](https://github.com/ultralytics/yolov5).  You better train demo files first before train your custom dataset.
-* Single GPU training:
-```
-$ python train.py  --batch-size 4 --device 0
-```
-* Multi GPU training:  DistributedDataParallel Mode 
-```
-python -m torch.distributed.launch --nproc_per_node 4 train.py --sync-bn --device 0,1,2,3
-```
-
-![train_batch_mosaic0](./train_batch0.jpg)
-![train_batch_mosaic1](./train_batch1.jpg)
-![train_batch_mosaic2](./train_batch2.jpg)
-
-
-`3.` `'detect.py'` 
-    
-* Download the demo files.
-* Then run the demo. Visualize the detection result and get the result txt files.
-
-```
-$  python detect.py
-```
-
-![detection_result_before_merge1](./P0004__1__0___0.png)
-![detection_result_before_merge2](./P0004__1__0___440.png)
-![draw_detection_result](./P1478__1__853___824.png)
-
-
-
-`4.` `'evaluation.py'` 
-
-* Run the detect.py demo first. Then change the path with yours:
-```
-evaluation
-(
-        detoutput=r'/....../DOTA_demo_view/detection',
-        imageset=r'/....../DOTA_demo_view/row_images',
-        annopath=r'/....../DOTA_demo_view/row_DOTA_labels/{:s}.txt'
-)
-draw_DOTA_image
-(
-        imgsrcpath=r'/...../DOTA_demo_view/row_images',
-        imglabelspath=r'/....../DOTA_demo_view/detection/result_txt/result_merged',
-        dstpath=r'/....../DOTA_demo_view/detection/merged_drawed'
-)
-```
-
-* Run the evaluation.py demo. Get the evaluation result and visualize the detection result which after merged.
-```
-$  python evaluation.py
-```
-
-![detection_result_after_merge](./P0004_.png)
-
-
-## 有问题反馈
-在使用中有任何问题，欢迎反馈给我，可以用以下联系方式跟我交流
-
-* 知乎（@[略略略](https://www.zhihu.com/people/lue-lue-lue-3-92-86)）
-* 代码问题提issues,其他问题请知乎上联系
-
-
-## 感激
-感谢以下的项目,排名不分先后
+#  Acknowledgements
+I have used utility functions from other wonderful open-source projects. Espeicially thank the authors of:
 
 * [ultralytics/yolov5](https://github.com/ultralytics/yolov5).
 * [Thinklab-SJTU/CSL_RetinaNet_Tensorflow](https://github.com/Thinklab-SJTU/CSL_RetinaNet_Tensorflow).
+* [jbwang1997/OBBDetection](https://github.com/jbwang1997/OBBDetection)
+* [CAPTAIN-WHU/DOTA_devkit](https://github.com/CAPTAIN-WHU/DOTA_devkit)
+## More detailed explanation
+想要了解相关实现的细节和原理可以看我的知乎文章:   
+* [自己改建YOLOv5旋转目标的踩坑记录](https://www.zhihu.com/column/c_1358464959123390464).
+
+## 有问题反馈
+在使用中有任何问题，建议先按照[install.md](./docs/install.md)检查环境依赖项，再按照[GetStart.md](./docs/GetStart.md)检查使用流程是否正确，善用搜索引擎和github中的issue搜索框，可以极大程度上节省你的时间。
+
+若遇到的是新问题，可以用以下联系方式跟我交流，为了提高沟通效率，请尽可能地提供相关信息以便我复现该问题。
+
+* 知乎（@[略略略](https://www.zhihu.com/people/lue-lue-lue-3-92-86)）
+* 代码问题提issues,其他问题请知乎上联系
 
 ## 关于作者
 
 ```javascript
   Name  : "胡凯旋"
   describe myself："咸鱼一枚"
-  
-```
-## 更多
-* 大家也可以参考另一个项目[BossZard/rotation-yolov5](https://github.com/BossZard/rotation-yolov5). , 该项目在比较早的时候就将yolov5用于旋转目标检测，也是本项目的启发之一;
-* 更多的旋转目标检测器可以参考[SJTU-Thinklab-Det/DOTA-DOAI](https://github.com/SJTU-Thinklab-Det/DOTA-DOAI). 里面有配套论文与开源代码.
+
