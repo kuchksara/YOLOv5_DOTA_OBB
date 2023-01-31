@@ -53,13 +53,6 @@ def detect(save_img=False):
     '''
     model = attempt_load(weights, map_location=device)  # load FP32 model
     imgsz = check_img_size(imgsz, s=model.stride.max())  # check img_size
-    model.eval()
-    try:
-        print(model.training)
-
-    except Exception:
-        print(type(model))
-        print('===========exception happend=========')
     # 设置Float16
     if half:
         model.half()  # to FP16
@@ -129,6 +122,13 @@ def detect(save_img=False):
         pred[0][..., 5:5+nc]为分类结果
         pred[0][..., 5+nc:]为Θ分类结果
         """
+        model.eval()
+        try:
+            print(model.training)
+
+        except Exception:
+            print(type(model))
+            print('===========exception happend=========')
         # pred : (batch_size, num_boxes, no)  batch_size=1
         pred = model(img, augment=opt.augment)[0]
 
