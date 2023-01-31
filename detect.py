@@ -129,6 +129,7 @@ def detect(save_img=False):
         except Exception:
             print(type(model))
             print('===========exception happend=========')
+        print(opt.device)
         # pred : (batch_size, num_boxes, no)  batch_size=1
         pred = model(img, augment=opt.augment)[0]
 
