@@ -1,4 +1,5 @@
-#include <ATen/ATen.h>
+// #include <ATen/ATen.h>
+#include <c10/cuda/CUDACachingAllocator.h>
 #include <ATen/cuda/CUDAContext.h>
 
 #include <THC/THC.h>
